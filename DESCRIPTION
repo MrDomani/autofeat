@@ -9,6 +9,9 @@ Authors@R:
 Description: SAFE framework allows automatic feature engineering for ML.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Imports: rlang
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
+Suggests: 
+    testthat
