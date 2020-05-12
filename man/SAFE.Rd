@@ -10,7 +10,8 @@ SAFE(
   X_valid,
   y_valid,
   operators = list(NULL, list(`+`, `-`, `*`, `/`)),
-  n_iter
+  n_iter,
+  nrounds
 )
 }
 \arguments{
@@ -18,7 +19,15 @@ SAFE(
 
 \item{y_train}{factor}
 
-\item{operators}{A \code{list} of lists of functions. Ith list of funcitons contains functions accepting i vectors of equal length and returning 1 vector of the same length.}
+\item{X_valid}{matrix}
+
+\item{y_valid}{factor}
+
+\item{operators}{A \code{list} of lists of functions. Ith list of funcitons contains functions accepting i vectors of equal length and returning 1 vector of the same length}
+
+\item{n_iter}{Integer}
+
+\item{nrounds}{Integer for \code{\link[xgboost]{xgboost}}}
 }
 \description{
 More description here
