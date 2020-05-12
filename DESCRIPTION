@@ -1,0 +1,14 @@
+Package: autofeat
+Title: Scalable Automatic Feature Engineering
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Pawel",
+           family = "Morgen",
+           role = c("aut", "cre"),
+           email = "seriousmorgen@protonmail.com")
+Description: SAFE framework allows automatic feature engineering for ML.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.0
