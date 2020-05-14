@@ -31,11 +31,14 @@ SAFE <- function(X_train, y_train, X_valid, y_valid,
     # 3. Sort and filter feature combinations
 
     selected_feat_combos <- sort_filter_combos(feat_combos, top_n)
-
-
-
-
-
+    new_feats <- lapply(selected_feat_combos, function(feat_combo){
+      as.data.frame(lapply(operators[[length(feat_combo)]], function(op){
+        do.call(op, as.data.frame(X_train[,feat_combo]))
+      }))
+    })
+    new_feats <- data.matrix(do.call(cbind, new_feats))
+    new_X <- cbind(X_train, new_feats)
+    colnames(new_X) <- paste0("SAFE", 1:ncol(new_feats))
   }
 }
 
@@ -73,10 +76,17 @@ constitute_feat_combos <- function(bst){
 #' @noRd
 sort_filter_combos <- function(feat_combos, top_n){
   # job - a set of features and values to split by
-  necessary_jobs <- determine_jobs(feat_combos, which(sapply(operators, is.null)))
+  necessary_jobs <- determine_jobs(feat_combos, which(sapply(operators, function(op) !is.null(op))))
   labels_splitted <- lapply(necessary_jobs, function(jobs_q){
-    lapply(jobs_q, function(job) execute_job)
+    lapply(jobs_q, function(job) execute_job(X_train, y_train, job))
   })
+  scores <- lapply(labels_splitted, function(labels_q){
+    sapply(labels_q, information_gain)
+  })
+  unlisted_scores <- unlist(scores, recursive = FALSE)
+  unlisted_jobs <- unlist(necessary_jobs, recursive = FALSE)
+  unlisted_job_names <- lapply(unlisted_jobs, function(job) job$Feature)[order(unlisted_scores, decreasing = TRUE)]
+  unique(unlisted_job_names)[1:top_n]
 }
 
 #' Determine necessary combinations to look at
