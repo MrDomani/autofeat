@@ -74,14 +74,16 @@ constitute_feat_combos <- function(bst){
 sort_filter_combos <- function(feat_combos, top_n){
   # job - a set of features and values to split by
   necessary_jobs <- determine_jobs(feat_combos, which(sapply(operators, is.null)))
-
+  x_splitted <- lapply(necessary_jobs, function(jobs_q){
+    lapply(jobs_q, function(job) execute_job)
+  })
 }
 
 #' Determine necessary combinations to look at
 #'
 #' @param feat_combos A list of data.frames from constitute_feat_combos
 #' @param seq_lengths Vector of lenghts of supplied operators. Combinations of how many features take into account?
-#'
+#' @return A nested list. On top of length == length(seq_lengths). Each element is a list of data.frames. Each of data.frames is a job to execute
 #' @noRd
 determine_jobs <- function(feat_combos, seq_lengths){
   lapply(seq_lengths, function(q){
@@ -102,4 +104,15 @@ determine_jobs <- function(feat_combos, seq_lengths){
 #' Split data according to info in `job`
 #' @param x Matrix
 #' @param job A data.frame with 2 columns: Feature and Split. Feature must contain names from colnames(x)
-#' @return A list of data frames
+#' @return A list of data frames from `x` splitted accordingly to `job`
+#' @noRd
+
+execute_job <- function(x, job){
+  jobs_splitted <- split(job, factor(job$Feature))
+  facs <- lapply(jobs_splitted, function(single_job){
+    vec <- x[,single_job$Feature[1]]
+    cut(vec, c(min(vec), single_job$Split, max(vec) + 1e-1), right = FALSE)
+  })
+  out <- split(as.data.frame(x), do.call(forcats::fct_cross, facs))
+  lapply(out, data.matrix)
+}
