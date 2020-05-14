@@ -41,7 +41,7 @@ SAFE <- function(X_train, y_train, X_valid, y_valid,
 
 #' Constitute Feature Combinations
 #' @import data.table
-#' @return a list of vectors of feature names
+#' @return a list of data.frames with pairs feature-value. Single feature might contain multiple values
 #' @noRd
 constitute_feat_combos <- function(bst){
   nrounds <- bst$niter
@@ -68,3 +68,38 @@ constitute_feat_combos <- function(bst){
   get("result", envir = temp_env)
 }
 
+#' Sort & filter feature combinations
+#'
+#' @noRd
+sort_filter_combos <- function(feat_combos, top_n){
+  # job - a set of features and values to split by
+  necessary_jobs <- determine_jobs(feat_combos, which(sapply(operators, is.null)))
+
+}
+
+#' Determine necessary combinations to look at
+#'
+#' @param feat_combos A list of data.frames from constitute_feat_combos
+#' @param seq_lengths Vector of lenghts of supplied operators. Combinations of how many features take into account?
+#'
+#' @noRd
+determine_jobs <- function(feat_combos, seq_lengths){
+  lapply(seq_lengths, function(q){
+    l <- lapply(feat_combos, function(combo){
+      feats <- unique(combo$Feature)
+      if(length(feats) < q) return(NULL)
+      all_combos <- combn(feats, q)
+      apply(all_combos, MARGIN = 2, function(row){
+        merge(data.frame(Feature = row), combo)
+      })
+    })
+    unique(unlist(l, recursive = FALSE))
+  })
+}
+
+#' Split data
+#'
+#' Split data according to info in `job`
+#' @param x Matrix
+#' @param job A data.frame with 2 columns: Feature and Split. Feature must contain names from colnames(x)
+#' @return A list of data frames
