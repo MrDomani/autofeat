@@ -74,7 +74,7 @@ constitute_feat_combos <- function(bst){
 sort_filter_combos <- function(feat_combos, top_n){
   # job - a set of features and values to split by
   necessary_jobs <- determine_jobs(feat_combos, which(sapply(operators, is.null)))
-  x_splitted <- lapply(necessary_jobs, function(jobs_q){
+  labels_splitted <- lapply(necessary_jobs, function(jobs_q){
     lapply(jobs_q, function(job) execute_job)
   })
 }
@@ -103,16 +103,17 @@ determine_jobs <- function(feat_combos, seq_lengths){
 #'
 #' Split data according to info in `job`
 #' @param x Matrix
+#' @param y Vector of labels
 #' @param job A data.frame with 2 columns: Feature and Split. Feature must contain names from colnames(x)
-#' @return A list of data frames from `x` splitted accordingly to `job`
+#' @return A list of labels splitted accordingly `x` and `job`
 #' @noRd
 
-execute_job <- function(x, job){
+execute_job <- function(x, y, job){
   jobs_splitted <- split(job, factor(job$Feature))
   facs <- lapply(jobs_splitted, function(single_job){
     vec <- x[,single_job$Feature[1]]
     cut(vec, c(min(vec), single_job$Split, max(vec) + 1e-1), right = FALSE)
   })
-  out <- split(as.data.frame(x), do.call(forcats::fct_cross, facs))
-  lapply(out, data.matrix)
+  combined_facs <- do.call(forcats::fct_cross, facs)
+  split(y, combined_facs)
 }

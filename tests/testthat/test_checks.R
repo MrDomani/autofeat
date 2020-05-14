@@ -37,3 +37,11 @@ test_that("check_n_iter working properly",{
   expect_error(check_n_iter(1:2))
   expect_error(check_n_iter(-1))
 })
+
+test_that("check_splitted_labels working properly",{
+  expect_error(check_splitted_labels(factor(LETTERS[1:5])))
+  expect_error(check_splitted_labels(list()))
+  expect_error(check_splitted_labels(list(a = 1:5, b = factor(LETTERS[1:5]))))
+  expect_silent(check_splitted_labels(list(a = factor(LETTERS[c(1,1,1,2,2,3)]),
+                                           b = factor(LETTERS[c(2,3,3)]))))
+})

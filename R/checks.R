@@ -53,3 +53,12 @@ check_operators <- function(operators){
 check_n_iter <- function(n_iter){
   if(!is.integer(n_iter) || n_iter < 1 || length(n_iter) != 1) rlang::abort("`n_iter` must be a single positive integer")
 }
+
+#' Check splitted_labels - information_gain function
+#'
+#' @noRd
+check_splitted_labels <- function(labels){
+  if(!is.list(labels)) rlang::abort(paste0("`operators` must be of list class, not ", class(labels)[1]))
+  if(length(labels) == 0) rlang::abort("`splitted_labels` is empty")
+  if(!all(sapply(labels, is.factor))) rlang::abort("all elements of `splitted_labels` must be of factor class")
+}

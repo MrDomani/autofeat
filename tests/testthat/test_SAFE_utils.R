@@ -3,14 +3,12 @@ context("SAFE utils working properly")
 library(xgboost)
 data("agaricus.train")
 data(iris)
-iris <- iris[,-5]
-expected_split <- list(iris[iris$Sepal.Length < 5 & iris$Sepal.Width < 3,],
-                       iris[iris$Sepal.Length >= 5 & iris$Sepal.Length < 6 & iris$Sepal.Width < 3,],
-                       iris[iris$Sepal.Length >= 6 & iris$Sepal.Width < 3,],
-                       iris[iris$Sepal.Length < 5 & iris$Sepal.Width >= 3,],
-                       iris[iris$Sepal.Length >= 5 & iris$Sepal.Length < 6 & iris$Sepal.Width >= 3,],
-                       iris[iris$Sepal.Length >= 6 & iris$Sepal.Width >= 3,])
-expected_split <- lapply(expected_split, as.matrix)
+expected_split <- list(iris[iris$Sepal.Length < 5 & iris$Sepal.Width < 3,"Species"],
+                       iris[iris$Sepal.Length >= 5 & iris$Sepal.Length < 6 & iris$Sepal.Width < 3,"Species"],
+                       iris[iris$Sepal.Length >= 6 & iris$Sepal.Width < 3,"Species"],
+                       iris[iris$Sepal.Length < 5 & iris$Sepal.Width >= 3,"Species"],
+                       iris[iris$Sepal.Length >= 5 & iris$Sepal.Length < 6 & iris$Sepal.Width >= 3,"Species"],
+                       iris[iris$Sepal.Length >= 6 & iris$Sepal.Width >= 3,"Species"])
 bst <- xgboost(data = agaricus.train$data, label = agaricus.train$label, nrounds = 5)
 custom_feat_combos <- list(data.frame(Feature = LETTERS[1:3],
                                       Split = 1:3),
@@ -37,7 +35,7 @@ test_that("determine_jobs working properly", {
 })
 
 test_that("execute_job working properly", {
-  expect_silent(res <- execute_job(iris, data.frame(Feature = c("Sepal.Length", "Sepal.Length", "Sepal.Width"),
+  expect_silent(res <- execute_job(iris[-5], iris$Species, data.frame(Feature = c("Sepal.Length", "Sepal.Length", "Sepal.Width"),
                                              Split = c(5,6,3))))
   expect_setequal(res, expected_split)
 })
