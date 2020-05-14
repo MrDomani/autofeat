@@ -5,14 +5,24 @@
 #' @param X_train matrix
 #' @param y_train factor
 #' @param X_valid matrix
-#' @param y_valid factor
+#' @param y_valid factor. ONLY 2 CATEGORIES
 #' @param operators A \code{list} of lists of functions. Ith list of funcitons contains functions accepting i vectors of equal length and returning 1 vector of the same length
 #' @param n_iter Integer
+#' @param top_n Integer. How many most important combinations will be selected?
 #' @param nrounds Integer for \code{\link[xgboost]{xgboost}}
+#' @param alpha Threshold for IV. Features with IV < alpha will be dropped
+#' @param bins Integer; amount of bins to create to discretize features.
+#' @param theta Threshold for Pearson's correlation. Features with correlation above theta will be dropped
 #' @export
 
 SAFE <- function(X_train, y_train, X_valid, y_valid,
-                 operators = list(NULL, list(`+`, `-`, `*`, `/`)), n_iter, nrounds){
+                 operators = list(NULL, list(`+`, `-`, `*`)),
+                 n_iter = 10,
+                 nrounds = 5,
+                 alpha = 0.1,
+                 top_n = 10,
+                 bins = 30,
+                 theta = 0.8){
   # 0 - check parameters
   check_dataset(X_train, y_train)
   check_dataset(X_valid, y_valid)
@@ -21,25 +31,36 @@ SAFE <- function(X_train, y_train, X_valid, y_valid,
   check_n_iter(n_iter)
 
   X <- rbind(X_train, X_valid)
+  y <- forcats::fct_c(y_train, y_valid)
   for(i in 1:n_iter){
     # 1. train xgboost
-    bst <- xgboost(data = X_train, label = y_train, nrounds = nrounds)
+    bst <- xgboost::xgboost(data = X, label = y, nrounds = nrounds, verbose = 0)
 
     # 2. Constitute feature combinations
     feat_combos <- constitute_feat_combos(bst)
 
     # 3. Sort and filter feature combinations
 
-    selected_feat_combos <- sort_filter_combos(feat_combos, top_n)
+    selected_feat_combos <- sort_filter_combos(X, y, feat_combos, qs = which(sapply(operators, function(op) !is.null(op))), top_n = top_n)
     new_feats <- lapply(selected_feat_combos, function(feat_combo){
       as.data.frame(lapply(operators[[length(feat_combo)]], function(op){
-        do.call(op, as.data.frame(X_train[,feat_combo]))
+        do.call(op, as.data.frame(X[,feat_combo]))
       }))
     })
     new_feats <- data.matrix(do.call(cbind, new_feats))
-    new_X <- cbind(X_train, new_feats)
-    colnames(new_X) <- paste0("SAFE", 1:ncol(new_feats))
+    new_X <- cbind(X, new_feats)
+    colnames(new_X) <- paste0("SAFE", 1:(ncol(new_feats) + ncol(X)))
+    informative_X <- remove_uninformative_features(new_X, y, alpha = alpha, bins = bins)
+    nonredundant_X <- remove_redundant_features(informative_X, y, bins = bins, theta = theta)
+
+    final_bst <- xgboost::xgboost(data = nonredundant_X, label = y, nrounds = nrounds, verbose = 0)
+    feat_gains <- calculate_avg_gain(final_bst, colnames(nonredundant_X))
+    sorted_gains <- feat_gains[order(feat_gains$gain, decreasing = TRUE)[1:min(nrow(feat_gains), ncol(X))],]
+    X <- nonredundant_X[,sorted_gains[["Feature"]]]
+    print(paste0(i, "th iteration out of ", n_iter, " complete"))
   }
+  list(X_train = X[1:nrow(X_train),],
+       X_valid = X[(nrow(X_train) + 1):nrow(X),])
 }
 
 #' Constitute Feature Combinations
@@ -72,13 +93,14 @@ constitute_feat_combos <- function(bst){
 }
 
 #' Sort & filter feature combinations
-#'
+#' @param x Matrix
+#' @param y Vector of labels
 #' @noRd
-sort_filter_combos <- function(feat_combos, top_n){
+sort_filter_combos <- function(X, y,feat_combos, qs, top_n){
   # job - a set of features and values to split by
-  necessary_jobs <- determine_jobs(feat_combos, which(sapply(operators, function(op) !is.null(op))))
+  necessary_jobs <- determine_jobs(feat_combos, qs)
   labels_splitted <- lapply(necessary_jobs, function(jobs_q){
-    lapply(jobs_q, function(job) execute_job(X_train, y_train, job))
+    lapply(jobs_q, function(job) execute_job(X, y, job))
   })
   scores <- lapply(labels_splitted, function(labels_q){
     sapply(labels_q, information_gain)
@@ -86,7 +108,8 @@ sort_filter_combos <- function(feat_combos, top_n){
   unlisted_scores <- unlist(scores, recursive = FALSE)
   unlisted_jobs <- unlist(necessary_jobs, recursive = FALSE)
   unlisted_job_names <- lapply(unlisted_jobs, function(job) job$Feature)[order(unlisted_scores, decreasing = TRUE)]
-  unique(unlisted_job_names)[1:top_n]
+  out <- unique(unlisted_job_names)
+  out[1:min(top_n, length(out))]
 }
 
 #' Determine necessary combinations to look at
@@ -118,12 +141,88 @@ determine_jobs <- function(feat_combos, seq_lengths){
 #' @return A list of labels splitted accordingly `x` and `job`
 #' @noRd
 
-execute_job <- function(x, y, job){
+execute_job <- function(X, y, job){
   jobs_splitted <- split(job, factor(job$Feature))
   facs <- lapply(jobs_splitted, function(single_job){
-    vec <- x[,single_job$Feature[1]]
+    vec <- X[,single_job$Feature[1]]
     cut(vec, c(min(vec), single_job$Split, max(vec) + 1e-1), right = FALSE)
   })
   combined_facs <- do.call(forcats::fct_cross, facs)
   split(y, combined_facs)
+}
+
+#' Remove features with low predictive power
+#'
+#' @param X Matrix
+#' @param y Factor of labels
+#' @param alpha threshold > 0. Features with IV < alpha will be discarded.
+#' @param bins integer
+#' @noRd
+
+remove_uninformative_features <- function(X, y, alpha, bins){
+  IVs <- calculate_IVs(X, y, bins)
+  X[,IVs >= alpha]
+}
+
+#' Remove highly correlated features
+#'
+#' @param X Matrix
+#' @param y Factor of labels
+#' @param alpha threshold > 0. Features with IV < alpha will be discarded.
+#' @param theta Threshold
+#' @noRd
+
+remove_redundant_features <- function(X, y, bins, theta){
+  cors <- cor(X)
+  IVs <- calculate_IVs(X, y, bins)
+  indices <- which.matrix(abs(cors) >= theta, ncol(X))
+  final_indices <- sapply(indices, function(i){
+    i[which.max(IVs[i])]
+  })
+  X[,unique(final_indices)]
+}
+
+#' Which indices in matrix are TRUE?
+#'
+#' @param logvec - logical
+#' vector, created by `mat` `operator` `value`, i.e. M > 0
+#' @param ncol number of columns in matrix
+#'
+#' @return A list of pairs (row_index, col_index) of elements in matrix which are TRUE.
+#' Diagonals omitted
+#' @noRd
+
+which.matrix <- function(logvec, ncol){
+  # zwraca listę par (wiersz, kolumna)
+  # logvec - wektor logiczny do which()
+  # ncol - ilość kolumn w macierzy
+  wh <- which(logvec)
+  l <- lapply(wh, function(w){
+    modulos <- w %% ncol
+    out <- c(replace(modulos, modulos == 0, ncol), ceiling(w / ncol))
+    if(out[1] > out[2]) NULL
+    else out
+  })
+  l[sapply(l, function(el) !is.null(el))]
+}
+
+calculate_IVs <- function(X, y, bins){
+  apply(X, 2, function(feat){
+    breaks <- sort(feat)[round(1:(bins - 1) / bins * length(feat))]
+    breaks <- unique(c(min(feat) - 1e-2, breaks, max(feat)))
+    if(length(breaks) >= 3){
+     bin_assignments <- forcats::fct_drop(cut(feat, breaks))
+     y_splitted <- split(y, bin_assignments)
+     IV(y_splitted)
+    }
+    else 0
+  })
+}
+
+calculate_avg_gain <- function(bst, all_feats){
+  dt <- xgboost::xgb.model.dt.tree(model = bst)
+  gains <- dt[Feature != "Leaf", .(gain = mean(Quality)),Feature]
+  all_gains <- merge(data.frame(Feature = all_feats), gains, all.x = TRUE)
+  all_gains[is.na(all_gains[["gain"]]), "gain"] <- 0
+  all_gains
 }

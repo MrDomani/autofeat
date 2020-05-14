@@ -2,8 +2,8 @@ context('checks working properly')
 
 data("iris")
 data("freeny")
-discretize <- function(x){
-  factor(round(x * 10))
+discretize <- function(x, n = 1){
+  factor(round(n * x))
 }
 i <- sample(1:nrow(freeny.x), 0.7 * nrow(freeny.x))
 freeny_train <- freeny.x[i,]
@@ -12,6 +12,7 @@ test_that("check_dataset working properly",{
   expect_error(check_dataset(iris[,-5], iris$Species))
   expect_error(check_dataset(freeny.x[-1,], freeny.y))
   expect_error(check_dataset(freeny.x, freeny.x[,1:2]))
+  expect_error(check_dataset(freeny.x, discretize(freeny.y, 10)))
   expect_silent(check_dataset(freeny.x, discretize(freeny.y)))
 })
 
@@ -36,6 +37,7 @@ test_that("check_n_iter working properly",{
   expect_error(check_n_iter("A"))
   expect_error(check_n_iter(1:2))
   expect_error(check_n_iter(-1))
+  expect_silent(check_n_iter(10))
 })
 
 test_that("check_splitted_labels working properly",{
@@ -44,4 +46,11 @@ test_that("check_splitted_labels working properly",{
   expect_error(check_splitted_labels(list(a = 1:5, b = factor(LETTERS[1:5]))))
   expect_silent(check_splitted_labels(list(a = factor(LETTERS[c(1,1,1,2,2,3)]),
                                            b = factor(LETTERS[c(2,3,3)]))))
+})
+
+test_that("check_splitted_binlabels working properly",{
+  expect_error(check_splitted_binlabels(list(a = factor(LETTERS[c(1,1,1,2,2,3)]),
+                                           b = factor(LETTERS[c(2,3,3)]))))
+  expect_silent(check_splitted_binlabels(list(a = factor(LETTERS[c(1,2,2)]),
+                                              b = factor(LETTERS[c(1,2)]))))
 })

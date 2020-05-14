@@ -9,9 +9,13 @@ SAFE(
   y_train,
   X_valid,
   y_valid,
-  operators = list(NULL, list(`+`, `-`, `*`, `/`)),
-  n_iter,
-  nrounds
+  operators = list(NULL, list(`+`, `-`, `*`)),
+  n_iter = 10,
+  nrounds = 5,
+  alpha = 0.1,
+  top_n = 10,
+  bins = 30,
+  theta = 0.8
 )
 }
 \arguments{
@@ -21,13 +25,21 @@ SAFE(
 
 \item{X_valid}{matrix}
 
-\item{y_valid}{factor}
+\item{y_valid}{factor. ONLY 2 CATEGORIES}
 
 \item{operators}{A \code{list} of lists of functions. Ith list of funcitons contains functions accepting i vectors of equal length and returning 1 vector of the same length}
 
 \item{n_iter}{Integer}
 
 \item{nrounds}{Integer for \code{\link[xgboost]{xgboost}}}
+
+\item{alpha}{Threshold for IV. Features with IV < alpha will be dropped}
+
+\item{top_n}{Integer. How many most important combinations will be selected?}
+
+\item{bins}{Integer; amount of bins to create to discretize features.}
+
+\item{theta}{Threshold for Pearson's correlation. Features with correlation above theta will be dropped}
 }
 \description{
 More description here

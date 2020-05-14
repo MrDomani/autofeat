@@ -12,7 +12,9 @@ information_gain(splitted_labels)
 \description{
 Based on changed entropy of the data, calculated information gain.
 }
-\details{
+\section{Details}{
+
 It is assumed, that y are splitted labels of a greater dataset.
 When combined together, they should form a vector equivalent to labels in original dataset (order may differ).
 }
+

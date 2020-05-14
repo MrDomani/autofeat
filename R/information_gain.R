@@ -4,7 +4,8 @@
 #'
 #' @param splitted_labels A list. Each element of it is a factor of labels.
 #'
-#' @details It is assumed, that y are splitted labels of a greater dataset.
+#' @section Details:
+#' It is assumed, that y are splitted labels of a greater dataset.
 #' When combined together, they should form a vector equivalent to labels in original dataset (order may differ).
 #' @export
 information_gain <- function(splitted_labels){

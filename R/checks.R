@@ -12,6 +12,9 @@ check_dataset <- function(X, y){
   if(!is.factor(y)) rlang::abort(paste0(y_name,
                                         " must be of factor class, not ",
                                         class(y)[1]))
+  if(length(attr(y, "levels")) != 2) rlang::abort(paste0(y_name,
+                                        " must be of 2 levels, not ",
+                                        length(attr(y, "levels"))))
   if(length(y) != nrow(X)) rlang::abort(paste0(X_name,
                                                " and ",
                                                y_name,
@@ -51,7 +54,7 @@ check_operators <- function(operators){
 #'
 #' @noRd
 check_n_iter <- function(n_iter){
-  if(!is.integer(n_iter) || n_iter < 1 || length(n_iter) != 1) rlang::abort("`n_iter` must be a single positive integer")
+  if(!rlang::is_integerish(n_iter) || n_iter < 1 || length(n_iter) != 1) rlang::abort("`n_iter` must be a single positive integer")
 }
 
 #' Check splitted_labels - information_gain function
@@ -61,4 +64,12 @@ check_splitted_labels <- function(labels){
   if(!is.list(labels)) rlang::abort(paste0("`operators` must be of list class, not ", class(labels)[1]))
   if(length(labels) == 0) rlang::abort("`splitted_labels` is empty")
   if(!all(sapply(labels, is.factor))) rlang::abort("all elements of `splitted_labels` must be of factor class")
+}
+
+#' Check splitted_labels - information_value function
+#'
+#' @noRd
+check_splitted_binlabels <- function(labels){
+  check_splitted_labels(labels)
+  if(!all(sapply(labels, function(lab)length(attr(lab, "levels")) <= 2))) rlang::abort("all elements of `splitted_labels` must be a binary factor")
 }
