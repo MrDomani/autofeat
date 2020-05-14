@@ -4,3 +4,9 @@
   <!-- badges: end -->
 # autofeat
 Scalable Automatic Feature Engineering
+
+## Install
+``` r
+# install.packages("devtools")
+devtools::install_github("MrDomani/autofeat")
+```
