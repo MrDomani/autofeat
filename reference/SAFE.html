@@ -40,7 +40,9 @@
 
 
 <meta property="og:title" content="Scalable Automatic Feature Engineering — SAFE" />
-<meta property="og:description" content="More description here" />
+<meta property="og:description" content="Generate automatically new features based on older ones for further modelling,
+using SAFE algoritm proposed in a paper by Shi, Zhang, Li, Yang and Zhou.
+This is a direct implementation of the pseudo-algoritm proposed in the paper, with its conventions, denotements and flaws." />
 
 
 
@@ -109,7 +111,9 @@
     </div>
 
     <div class="ref-description">
-    <p>More description here</p>
+    <p>Generate automatically new features based on older ones for further modelling,
+using SAFE algoritm proposed in a paper by Shi, Zhang, Li, Yang and Zhou.
+This is a direct implementation of the pseudo-algoritm proposed in the paper, with its conventions, denotements and flaws.</p>
     </div>
 
     <pre class="usage"><span class='fu'>SAFE</span>(
@@ -121,9 +125,10 @@
   <span class='kw'>n_iter</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>nrounds</span> <span class='kw'>=</span> <span class='fl'>5</span>,
   <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
-  <span class='kw'>top_n</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>gamma</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>bins</span> <span class='kw'>=</span> <span class='fl'>30</span>,
-  <span class='kw'>theta</span> <span class='kw'>=</span> <span class='fl'>0.8</span>
+  <span class='kw'>theta</span> <span class='kw'>=</span> <span class='fl'>0.8</span>,
+  <span class='kw'>beta</span> <span class='kw'>=</span> <span class='fl'>Inf</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -131,39 +136,39 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>X_train</th>
-      <td><p>matrix</p></td>
+      <td><p>Matrix - data used to train model. Must be numerical.</p></td>
     </tr>
     <tr>
       <th>y_train</th>
-      <td><p>factor</p></td>
+      <td><p>Factor - labels for training data. Must be <strong>binary</strong>.</p></td>
     </tr>
     <tr>
       <th>X_valid</th>
-      <td><p>matrix</p></td>
+      <td><p>Matrix - data used to test model. Must be numerical.</p></td>
     </tr>
     <tr>
       <th>y_valid</th>
-      <td><p>factor. ONLY 2 CATEGORIES</p></td>
+      <td><p>Factor - labels for testing data. Must be <strong>binary</strong>.</p></td>
     </tr>
     <tr>
       <th>operators</th>
-      <td><p>A <code>list</code> of lists of functions. Ith list of funcitons contains functions accepting i vectors of equal length and returning 1 vector of the same length</p></td>
+      <td><p>A <code>list</code> of lists of functions. Ith list of funcitons contains functions accepting <code>i</code> vectors of equal length and returning 1 vector of the same length.</p></td>
     </tr>
     <tr>
       <th>n_iter</th>
-      <td><p>Integer</p></td>
+      <td><p>Integer; Amount of iterations for the alghoritm to perform.</p></td>
     </tr>
     <tr>
       <th>nrounds</th>
-      <td><p>Integer for <code><a href='https://rdrr.io/pkg/xgboost/man/xgb.train.html'>xgboost</a></code></p></td>
+      <td><p>Integer for <code><a href='https://rdrr.io/pkg/xgboost/man/xgb.train.html'>xgboost</a></code>.</p></td>
     </tr>
     <tr>
       <th>alpha</th>
-      <td><p>Threshold for IV. Features with IV &lt; alpha will be dropped</p></td>
+      <td><p>Threshold for <code>link{IV}</code>. Features with IV &lt; alpha will be dropped.</p></td>
     </tr>
     <tr>
-      <th>top_n</th>
-      <td><p>Integer. How many most important combinations will be selected?</p></td>
+      <th>gamma</th>
+      <td><p>Integer; Amount of most important feature combinations to be selected in each iteration.</p></td>
     </tr>
     <tr>
       <th>bins</th>
@@ -171,10 +176,19 @@
     </tr>
     <tr>
       <th>theta</th>
-      <td><p>Threshold for Pearson's correlation. Features with correlation above theta will be dropped</p></td>
+      <td><p>Threshold for Pearson's correlation. Features with correlation above theta will be dropped.</p></td>
+    </tr>
+    <tr>
+      <th>beta</th>
+      <td><p>Integer; Maximum amount of features to be selected at the end of each loop. Set to <code>Inf</code> to select all features.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A <code>list</code> with 2 elements: <code>X_train</code> and <code>X_test</code>.
+Both contain transformed train and test sets, ready for further modelling.
+Unfortunately, this is in contrary to algoritm mentioned in the paper (which returns a function) - at least for now.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
