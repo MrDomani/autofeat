@@ -57,6 +57,48 @@ check_n_iter <- function(n_iter){
   if(!rlang::is_integerish(n_iter) || n_iter < 1 || length(n_iter) != 1) rlang::abort("`n_iter` must be a single positive integer")
 }
 
+#' Check nrounds
+#'
+#' @noRd
+check_nrounds <- function(nrounds){
+  if(!rlang::is_integerish(nrounds) || nrounds < 1 || length(nrounds) != 1) rlang::abort("`nrounds` must be a single positive integer")
+}
+
+#' Check alpha
+#'
+#' @noRd
+check_alpha <- function(alpha){
+  if(!is.numeric(alpha) || alpha <= 0 || length(alpha) != 1) rlang::abort("`alpha` must be a single positive number")
+}
+
+#' Check gamma
+#'
+#' @noRd
+check_gamma <- function(gamma){
+  if(!rlang::is_integerish(gamma) || gamma < 1 || length(gamma) != 1) rlang::abort("`gamma` must be a single positive integer")
+}
+
+#' Check bins
+#'
+#' @noRd
+check_bins <- function(bins){
+  if(!rlang::is_integerish(bins) || bins < 1 || length(bins) != 1) rlang::abort("`bins` must be a single positive integer")
+}
+
+#' Check theta
+#'
+#' @noRd
+check_theta <- function(theta){
+  if(!is.numeric(theta) || theta <= 0 || length(theta) != 1) rlang::abort("`theta` must be a single positive number")
+}
+
+#' Check beta
+#'
+#' @noRd
+check_beta <- function(beta){
+  if(!rlang::is_integerish(beta) || beta < 1 || length(beta) != 1) rlang::abort("`beta` must be a single positive integer")
+}
+
 #' Check splitted_labels - information_gain function
 #'
 #' @noRd
