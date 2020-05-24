@@ -13,34 +13,44 @@ SAFE(
   n_iter = 10,
   nrounds = 5,
   alpha = 0.1,
-  top_n = 10,
+  gamma = 10,
   bins = 30,
-  theta = 0.8
+  theta = 0.8,
+  beta = Inf
 )
 }
 \arguments{
-\item{X_train}{matrix}
+\item{X_train}{Matrix - data used to train model. Must be numerical.}
 
-\item{y_train}{factor}
+\item{y_train}{Factor - labels for training data. Must be \strong{binary}.}
 
-\item{X_valid}{matrix}
+\item{X_valid}{Matrix - data used to test model. Must be numerical.}
 
-\item{y_valid}{factor. ONLY 2 CATEGORIES}
+\item{y_valid}{Factor - labels for testing data. Must be \strong{binary}.}
 
-\item{operators}{A \code{list} of lists of functions. Ith list of funcitons contains functions accepting i vectors of equal length and returning 1 vector of the same length}
+\item{operators}{A \code{list} of lists of functions. Ith list of funcitons contains functions accepting \code{i} vectors of equal length and returning 1 vector of the same length.}
 
-\item{n_iter}{Integer}
+\item{n_iter}{Integer; Amount of iterations for the alghoritm to perform.}
 
-\item{nrounds}{Integer for \code{\link[xgboost]{xgboost}}}
+\item{nrounds}{Integer for \code{\link[xgboost]{xgboost}}.}
 
-\item{alpha}{Threshold for IV. Features with IV < alpha will be dropped}
+\item{alpha}{Threshold for \code{link{IV}}. Features with IV < alpha will be dropped.}
 
-\item{top_n}{Integer. How many most important combinations will be selected?}
+\item{gamma}{Integer; Amount of most important feature combinations to be selected in each iteration.}
 
 \item{bins}{Integer; amount of bins to create to discretize features.}
 
-\item{theta}{Threshold for Pearson's correlation. Features with correlation above theta will be dropped}
+\item{theta}{Threshold for Pearson's correlation. Features with correlation above theta will be dropped.}
+
+\item{beta}{Integer; Maximum amount of features to be selected at the end of each loop. Set to \code{Inf} to select all features.}
+}
+\value{
+A \code{list} with 2 elements: \code{X_train} and \code{X_test}.
+Both contain transformed train and test sets, ready for further modelling.
+Unfortunately, this is in contrary to algoritm mentioned in the paper (which returns a function) - at least for now.
 }
 \description{
-More description here
+Generate automatically new features based on older ones for further modelling,
+using SAFE algoritm proposed in a paper by Shi, Zhang, Li, Yang and Zhou.
+This is a direct implementation of the pseudo-algoritm proposed in the paper, with its conventions, denotements and flaws.
 }

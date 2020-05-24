@@ -77,8 +77,9 @@ SAFE <- function(X_train, y_train, X_valid, y_valid,
     feat_gains <- calculate_avg_gain(final_bst, colnames(nonredundant_X))
     sorted_gains <- feat_gains[order(feat_gains$gain, decreasing = TRUE)[1:min(nrow(feat_gains), beta)],]
     X <- nonredundant_X[,sorted_gains[["Feature"]]]
-    cat(paste0(i, "th iteration out of ", n_iter, " complete"))
+    cat(paste0("\n", i, "th iteration out of ", n_iter, " complete"))
   }
+  cat("\n")
   list(X_train = X[1:nrow(X_train),],
        X_valid = X[(nrow(X_train) + 1):nrow(X),])
 }
@@ -145,7 +146,7 @@ sort_filter_combos <- function(X, y,feat_combos, seq_lengths, gamma){
 
   # Return the most informative combinations
   unlisted_jobs <- unlist(necessary_jobs, recursive = FALSE)
-  unlisted_job_names <- lapply(unlisted_jobs, function(job) job$Feature)[order(scores, decreasing = TRUE)]
+  unlisted_job_names <- lapply(unlisted_jobs, function(job) unique(job$Feature))[order(scores, decreasing = TRUE)]
   out <- unique(unlisted_job_names)
   out[1:min(gamma, length(out))]
 }
@@ -207,6 +208,7 @@ remove_uninformative_features <- function(X, y, alpha, bins){
 #' @param X Matrix
 #' @param y Factor of labels
 #' @param bins Integer
+#' @noRd
 calculate_IVs <- function(X, y, bins){
   apply(X, 2, function(feat){
     breaks <- sort(feat)[round(1:(bins - 1) / bins * length(feat))]
