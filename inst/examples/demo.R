@@ -24,6 +24,9 @@ task2_test <- makeClassifTask("SAFE_test", data.frame(X_test_SAFEd, target = y_t
 
 lrn <- makeLearner("classif.ranger", predict.type = "prob")
 
+crossval(lrn, task1, measures = list(auc, ppv))$aggr
+crossval(lrn, task2, measures = list(auc, ppv))$aggr
+
 ranger1 <- train(lrn, task1)
 ranger2 <- train(lrn, task2)
 
