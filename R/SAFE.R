@@ -157,6 +157,7 @@ sort_filter_combos <- function(X, y,feat_combos, seq_lengths, gamma){
 #' @param feat_combos A list a list of data.frames with 2 columns: `Feature` and `Split`. See `constitue_feat_combos`.
 #' @param seq_lengths Vector of integers with info combinations of how many features to consider.
 #' @return A nested list. On top of length == length(seq_lengths). Each element is a list of data.frames. Each of data.frames is a job to execute
+#' @importFrom utils combn
 #' @noRd
 determine_jobs <- function(feat_combos, seq_lengths){
   lapply(seq_lengths, function(q){
@@ -231,6 +232,7 @@ calculate_IVs <- function(X, y, bins){
 #' @param y Factor of labels
 #' @param alpha threshold > 0. Features with IV < alpha will be discarded.
 #' @param theta Threshold
+#' @importFrom stats cor
 #' @noRd
 
 remove_redundant_features <- function(X, y, bins, theta){
