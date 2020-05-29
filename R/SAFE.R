@@ -11,7 +11,7 @@
 #' @param operators A \code{list} of lists of functions. Ith list of funcitons contains functions accepting \code{i} vectors of equal length and returning 1 vector of the same length.
 #' @param n_iter Integer; Amount of iterations for the alghoritm to perform.
 #' @param gamma Integer; Amount of most important feature combinations to be selected in each iteration.
-#' @param nrounds Integer for \code{\link[xgboost]{xgboost}}.
+#' @param nrounds Integer for \code{\link[xgboost]{xgb.train}}.
 #' @param alpha Threshold for \code{link{IV}}. Features with IV < alpha will be dropped.
 #' @param bins Integer; amount of bins to create to discretize features.
 #' @param theta Threshold for Pearson's correlation. Features with correlation above theta will be dropped.
@@ -114,7 +114,8 @@ constitute_feat_combos <- function(bst){
   }
   # Initiate the search
   rec_search(0, data.frame(Feature = character(0),
-                           Split = numeric(0)))
+                           Split = numeric(0),
+                           stringsAsFactors = FALSE))
 
   # Return the result
   get("result", envir = temp_env)
