@@ -13,14 +13,14 @@ Imports: rlang,
         xgboost,
         data.table,
         forcats
-Suggests: DALEX,
-        ranger,
-        mlr
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Suggests: 
     testthat,
     spelling,
-    covr
+    covr,
+    DALEX,
+    ranger,
+    mlr
 Language: en-US
