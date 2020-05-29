@@ -32,7 +32,7 @@ SAFE(
 
 \item{n_iter}{Integer; Amount of iterations for the alghoritm to perform.}
 
-\item{nrounds}{Integer for \code{\link[xgboost]{xgboost}}.}
+\item{nrounds}{Integer for \code{\link[xgboost]{xgb.train}}.}
 
 \item{alpha}{Threshold for \code{link{IV}}. Features with IV < alpha will be dropped.}
 

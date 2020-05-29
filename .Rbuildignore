@@ -3,3 +3,5 @@
 ^LICENSE\.md$
 ^codecov\.yml$
 ^\.travis\.yml$
+^doc$
+^Meta$

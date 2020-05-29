@@ -22,5 +22,8 @@ Suggests:
     covr,
     DALEX,
     ranger,
-    mlr
+    mlr,
+    knitr,
+    rmarkdown
 Language: en-US
+VignetteBuilder: knitr
