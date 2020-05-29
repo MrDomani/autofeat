@@ -93,7 +93,7 @@ SAFE <- function(X_train, y_train, X_valid, y_valid,
 #' @noRd
 constitute_feat_combos <- function(bst){
   nrounds <- bst$niter
-  model_dt <- xgb.model.dt.tree(model = bst, trees = nrounds - 1, use_int_id = TRUE)
+  model_dt <- xgboost::xgb.model.dt.tree(model = bst, trees = nrounds - 1, use_int_id = TRUE)
   temp_env <- rlang::new_environment()
   assign("result", list(), envir = temp_env)
 
