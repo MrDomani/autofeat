@@ -107,7 +107,8 @@ constitute_feat_combos <- function(bst){
       return()
     }
     history <- rbind(history, data.frame(Feature = current_feature,
-                                         Split = model_dt[Node == id, Split]))
+                                         Split = model_dt[Node == id, Split],
+                                         stringsAsFactors = FALSE))
     rec_search(model_dt[Node == id, Yes], history)
     rec_search(model_dt[Node == id, No], history)
   }
@@ -164,7 +165,8 @@ determine_jobs <- function(feat_combos, seq_lengths){
       if(length(feats) < q) return(NULL)
       all_combos <- combn(feats, q)
       apply(all_combos, MARGIN = 2, function(row){
-        merge(data.frame(Feature = row), combo)
+        merge(data.frame(Feature = row,
+                         stringsAsFactors = FALSE), combo)
       })
     })
     unique(unlist(l, recursive = FALSE))
@@ -265,7 +267,8 @@ which.matrix <- function(logvec, ncol){
 calculate_avg_gain <- function(bst, all_feats){
   dt <- xgboost::xgb.model.dt.tree(model = bst)
   gains <- dt[Feature != "Leaf", .(gain = mean(Quality)),Feature]
-  all_gains <- merge(data.frame(Feature = all_feats), gains, all.x = TRUE)
+  all_gains <- merge(data.frame(Feature = all_feats,
+                                stringsAsFactors = FALSE), gains, all.x = TRUE)
   all_gains[is.na(all_gains[["gain"]]), "gain"] <- 0
   all_gains
 }
