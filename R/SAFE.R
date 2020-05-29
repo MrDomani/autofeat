@@ -108,7 +108,8 @@ constitute_feat_combos <- function(bst){
     }
     history <- rbind(history, data.frame(Feature = current_feature,
                                          Split = model_dt[Node == id, Split],
-                                         stringsAsFactors = FALSE))
+                                         stringsAsFactors = FALSE),
+                     stringsAsFactors = FALSE)
     rec_search(model_dt[Node == id, Yes], history)
     rec_search(model_dt[Node == id, No], history)
   }
