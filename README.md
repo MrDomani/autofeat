@@ -8,5 +8,6 @@ Scalable Automatic Feature Engineering
 
 ## Install
 ``` r
-# install.packages("remotes")remotes::install_github("MrDomani/autofeat")
+# install.packages("remotes")
+remotes::install_github("MrDomani/autofeat")
 ```
